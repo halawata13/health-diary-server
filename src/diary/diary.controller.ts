@@ -14,7 +14,7 @@ export class DiaryController {
   @Get()
   async get(@Req() req: JwtRequest, @Query() query: DiaryGetDto) {
     const from = new Date(query.year, query.month - 1);
-    const to = DateTime.fromJSDate(from).set({ day: 1 }).plus({ month: 1, day: -1 }).toJSDate();
+    const to = DateTime.fromJSDate(from).set({ day: 1 }).plus({ months: 1, days: -1 }).toJSDate();
     return await this.diaryService.find(req.user.id, from, to);
   }
 
