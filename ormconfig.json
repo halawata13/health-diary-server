@@ -1,0 +1,18 @@
+{
+  "type": "mysql",
+  "host": "localhost",
+  "port": 3306,
+  "username": "health_diary",
+  "password": "health_diary",
+  "database": "health_diary",
+  "entities": [
+    "src/**/*.entity{.ts,.js}"
+  ],
+  "migrations": [
+    "src/database/migration/*{.ts,.js}"
+  ],
+  "cli": {
+    "migrationsDir": "src/database/migration"
+  },
+  "synchronize": false
+}
