@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { Symptom } from './symptom.entity';
 import { SymptomCreateDto, SymptomUpdateDto } from './symptom.dto';
 import { DiarySymptom } from '../diary-symptom/diary-symptom.entity';
+import { count } from "rxjs";
 
 @Injectable()
 export class SymptomService {
@@ -14,27 +15,25 @@ export class SymptomService {
 
   async findAll(userId: number) {
     const queryBuilder = this.symptomRepository.createQueryBuilder('');
-    const subQuery = (() => {
-      const q = queryBuilder
-        .subQuery()
-        .select('1')
-        .from(DiarySymptom, 'DS')
-        .where('Symptom.id = DS.symptom_id')
-        .getSql()
-      return `EXISTS(${q})`
-    })();
+    const subQuery = queryBuilder
+      .subQuery()
+      .select('COUNT(*)')
+      .from(DiarySymptom, 'DS')
+      .where('Symptom.id = DS.symptom_id')
+      .getSql();
 
     const result = await queryBuilder
       .select('id', 'id')
       .addSelect('name', 'name')
       .addSelect('color', 'color')
-      .addSelect(subQuery, 'isDeletable')
+      .addSelect(subQuery, 'count')
       .where({ userId })
       .getRawMany();
 
     return result.map(s => ({
         ...s,
-        isDeletable: s.isDeletable !== 1,
+        count: Number(s.count),
+        isDeletable: s.count === '0',
     }));
   }
 
