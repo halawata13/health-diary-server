@@ -19,7 +19,7 @@ export class DiaryCreateDto {
 
   @IsNotEmpty()
   @IsNumber()
-  condition: number;
+  condition: number | null;
 
   @IsNotEmpty()
   @IsString()

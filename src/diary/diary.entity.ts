@@ -16,7 +16,7 @@ export class Diary {
   @Column({ type: 'text' })
   memo: string;
 
-  @Column()
+  @Column({ nullable: true })
   condition: number;
 
   @Column({ type: 'date' })
