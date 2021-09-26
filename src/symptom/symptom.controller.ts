@@ -12,7 +12,7 @@ export class SymptomController {
   @UseGuards(JwtGuard)
   @Get()
   async get(@Req() req: JwtRequest, @Query() query: SymptomGetDto) {
-    const result = await this.symptomService.find(req.user.id, query.id);
+    const result = await this.symptomService.find(req.user.id, query);
     if (!result) {
       throw new NotFoundException();
     }

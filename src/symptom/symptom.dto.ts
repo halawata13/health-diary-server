@@ -1,10 +1,26 @@
-import { IsNotEmpty, IsNumberString, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumberString, IsOptional, IsString } from 'class-validator';
 
 export class SymptomGetDto {
   @IsNotEmpty()
   @IsString()
   @IsNumberString()
   id: number;
+
+  @IsOptional()
+  @IsNumberString()
+  fromYear: number;
+
+  @IsOptional()
+  @IsNumberString()
+  fromMonth: number;
+
+  @IsOptional()
+  @IsNumberString()
+  toYear: number;
+
+  @IsOptional()
+  @IsNumberString()
+  toMonth: number;
 }
 
 export class SymptomCreateDto {

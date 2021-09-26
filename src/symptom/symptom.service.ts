@@ -1,9 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Symptom } from './symptom.entity';
-import { SymptomCreateDto, SymptomUpdateDto } from './symptom.dto';
+import { SymptomCreateDto, SymptomGetDto, SymptomUpdateDto } from './symptom.dto';
 import { DiarySymptom } from '../diary-symptom/diary-symptom.entity';
-import { count } from "rxjs";
+import { Diary } from "../diary/diary.entity";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class SymptomService {
@@ -37,24 +38,28 @@ export class SymptomService {
     }));
   }
 
-  async find(userId: number, id: number) {
-    return this.symptomRepository.findOne({
-      select: [
-        'id',
-        'name',
-        'color',
-      ],
-      join: {
-        alias: 'symptom',
-        leftJoinAndSelect: {
-          diarySymptoms: 'symptom.diarySymptoms',
-        },
-      },
-      where: {
-        id,
-        userId,
-      },
-    });
+  async find(userId: number, params: SymptomGetDto) {
+    const query = await this.symptomRepository.createQueryBuilder('s')
+      .select('s.id', 'id')
+      .addSelect('s.name', 'name')
+      .addSelect('s.color', 'color')
+      .addSelect('ds.level', 'level')
+      .addSelect('d.date', 'date')
+      .leftJoin(DiarySymptom, 'ds', 'ds.symptom_id = s.id')
+      .leftJoin(Diary, 'd', 'ds.diary_id = d.id')
+      .where('s.id = :id', { id: params.id })
+      .andWhere('s.user_id = :userId', { userId });
+
+    if (params.fromYear !== undefined && params.fromMonth !== undefined && params.toYear !== undefined && params.toMonth !== undefined) {
+      query.andWhere('d.date >= :from', { from: `${params.fromYear}-${params.fromMonth}-01` });
+      const to = DateTime
+        .fromFormat(`${params.toYear}-${params.toMonth}-01`, 'yyyy-MM-dd')
+        .plus({ months: 1 })
+        .toFormat('yyyy-MM-dd');
+      query.andWhere('d.date < :to', { to });
+    }
+
+    return query.getRawOne();
   }
 
   async create(userId: number, params: SymptomCreateDto) {
