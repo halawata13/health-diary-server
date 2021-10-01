@@ -29,6 +29,7 @@ export class SymptomService {
       .addSelect('color', 'color')
       .addSelect(subQuery, 'count')
       .where({ userId })
+      .orderBy('count', 'DESC')
       .getRawMany();
 
     return result.map(s => ({
