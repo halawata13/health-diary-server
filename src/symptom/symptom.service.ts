@@ -49,7 +49,8 @@ export class SymptomService {
       .leftJoin(DiarySymptom, 'ds', 'ds.symptom_id = s.id')
       .leftJoin(Diary, 'd', 'ds.diary_id = d.id')
       .where('s.id = :id', { id: params.id })
-      .andWhere('s.user_id = :userId', { userId });
+      .andWhere('s.user_id = :userId', { userId })
+      .orderBy('date', 'ASC');
 
     if (params.fromYear !== undefined && params.fromMonth !== undefined && params.toYear !== undefined && params.toMonth !== undefined) {
       query.andWhere('d.date >= :from', { from: `${params.fromYear}-${params.fromMonth}-01` });
@@ -60,7 +61,22 @@ export class SymptomService {
       query.andWhere('d.date < :to', { to });
     }
 
-    return query.getRawOne();
+    const result = await query.getRawMany();
+    if (result.length === 0) {
+      return [];
+    }
+
+    const diarySymptoms = result.map(row => ({
+      level: row.level,
+      date: row.date,
+    }));
+
+    return {
+      id: result[0].id,
+      name: result[0].name,
+      color: result[0].color,
+      diarySymptoms,
+    }
   }
 
   async create(userId: number, params: SymptomCreateDto) {
