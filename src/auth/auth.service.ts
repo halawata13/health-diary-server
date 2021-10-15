@@ -31,7 +31,7 @@ export class AuthService {
     };
 
     return {
-      ...user,
+      name: user.name,
       accessToken: this.jwtService.sign(payload),
     }
   }
