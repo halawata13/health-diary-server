@@ -11,6 +11,8 @@ export class UserService {
   }
 
   findOne(name: string): Promise<User | undefined> {
-    return this.userRepository.findOne({ name });
+    return this.userRepository.findOne({
+      where: { name },
+    });
   }
 }

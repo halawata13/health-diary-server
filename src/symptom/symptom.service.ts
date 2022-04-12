@@ -40,6 +40,11 @@ export class SymptomService {
   }
 
   async find(userId: number, params: SymptomGetDto) {
+    const symptom = await this.symptomRepository.findOne(params.id);
+    if (!symptom) {
+      return null;
+    }
+
     const query = await this.symptomRepository.createQueryBuilder('s')
       .select('s.id', 'id')
       .addSelect('s.name', 'name')
@@ -55,16 +60,13 @@ export class SymptomService {
     if (params.fromYear !== undefined && params.fromMonth !== undefined && params.toYear !== undefined && params.toMonth !== undefined) {
       query.andWhere('d.date >= :from', { from: `${params.fromYear}-${params.fromMonth}-01` });
       const to = DateTime
-        .fromFormat(`${params.toYear}-${params.toMonth}-01`, 'yyyy-MM-dd')
+        .fromFormat(`${params.toYear}-${String(params.toMonth).padStart(2, '0')}-01`, 'yyyy-MM-dd')
         .plus({ months: 1 })
         .toFormat('yyyy-MM-dd');
       query.andWhere('d.date < :to', { to });
     }
 
     const result = await query.getRawMany();
-    if (result.length === 0) {
-      return [];
-    }
 
     const diarySymptoms = result.map(row => ({
       level: row.level,
@@ -72,9 +74,9 @@ export class SymptomService {
     }));
 
     return {
-      id: result[0].id,
-      name: result[0].name,
-      color: result[0].color,
+      id: symptom.id,
+      name: symptom.name,
+      color: symptom.color,
       diarySymptoms,
     }
   }
@@ -90,8 +92,10 @@ export class SymptomService {
 
   async update(userId: number, params: SymptomUpdateDto) {
     const symptom = await this.symptomRepository.findOne({
-      id: params.id,
-      userId: userId,
+      where: {
+        id: params.id,
+        userId: userId,
+      },
     });
     if (!symptom) {
       return null;
@@ -107,8 +111,10 @@ export class SymptomService {
 
   async delete(userId: number, id: number): Promise<Symptom | null> {
     const symptom = await this.symptomRepository.findOne({
-      id,
-      userId,
+      where: {
+        id,
+        userId,
+      },
     });
     if (!symptom) {
       return null;

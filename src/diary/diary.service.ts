@@ -60,8 +60,10 @@ export class DiaryService {
   async update(userId: number, params: DiaryUpdateDto) {
     return getConnection().transaction(async _ => {
       const diary = await this.diaryRepository.findOne({
-        id: params.id,
-        userId: userId,
+        where: {
+          id: params.id,
+          userId: userId,
+        },
       });
       if (!diary) {
         return null;
